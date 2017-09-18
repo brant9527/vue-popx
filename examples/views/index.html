@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Examples</title>
+  </head>
+
+  <body>
+    <div id="app">
+      {{message}}
+      <div class="tpls" style="display: none;">
+        <div class="popx-html">
+          hello china<br>
+          <span @click="popxHtmlClick"> click </span>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.5/umd/popper.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.4.2/vue.js"></script>
+    <script src="./vue-popx.js"></script>
+    <script>
+      Vue.use(this['vue-popx'])
+
+      var Child = {
+        template: '<div>A custom component!</div>'
+      }
+
+      console.log(Child)
+
+      var app = new Vue({
+        el: '#app',
+        data: {
+          message: 'Hello Vue!'
+        },
+        methods: {
+          popxHtmlClick: function () {
+            console.log('popxHtmlClick')
+          }
+        },
+        mounted: function () {
+          this.$Popx({
+            popper: document.querySelector('.popx-html')
+          });
+        }
+      })
+    </script>
+  </body>
+</html>

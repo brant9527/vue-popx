@@ -26,14 +26,18 @@ const func = function (opts) {
       applyStyle: { enabled: false }
     }
   }
-  return {
-    uid: PopParse(opts, this),
-    func: func
-  }
+  return PopParse(opts, this)
 }
 
 func.close = function (uid) {
-  rvm.popx.close(uid)
+  if (Static.manage) Static.manage.close(uid)
+}
+
+func.manage = Static.manage
+
+func.destroy = function () {
+  delete func.manage
+  delete Static.Vue.prototype.$Popx
 }
 
 /**

@@ -1,15 +1,9 @@
 /**
  * vue-popx v0.1.0
- * (c) 2017/9/19 上午10:45:05 Hainc <cnria@qq.com>
+ * (c) 2017/9/19 上午10:52:14 Hainc <cnria@qq.com>
  * @license MIT
  */
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('popper.js')) :
-	typeof define === 'function' && define.amd ? define(['popper.js'], factory) :
-	(global['vue-popx'] = factory(global.Popper));
-}(this, (function (Popper) { 'use strict';
-
-Popper = Popper && Popper.hasOwnProperty('default') ? Popper['default'] : Popper;
+import Popper from 'popper.js';
 
 var Poptype = {
   checkPopper: function checkPopper (popper) {
@@ -269,6 +263,4 @@ var main = {
   }
 };
 
-return main;
-
-})));
+export default main;

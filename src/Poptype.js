@@ -7,9 +7,10 @@ export default {
     } else {
       switch ((typeof popper).toLowerCase()) {
         case 'object':
-          let ifs = popper.hasOwnProperty('render') && popper.hasOwnProperty('staticRenderFns')
-          ifs = ifs || popper.hasOwnProperty('template')
-          if (ifs) type = 'component'
+          let if1 = popper.hasOwnProperty('render') && popper.hasOwnProperty('staticRenderFns')
+          let if2 = popper.hasOwnProperty('template') && (typeof popper.template).toLowerCase() === 'string'
+          if (!if2 && popper.template) throw new Error('The template must be a string')
+          if (if1 || if2) type = 'component'
           break
         case 'string':
           type = 'string'

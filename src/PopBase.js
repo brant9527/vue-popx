@@ -22,7 +22,7 @@ export default class {
    * 初始化完成
    */
   initComplete () {
-    this._pvm['$parent'] = this._pvm['$root'] = this._vm.$root
+    this._pvm['$parent'] = this._vm.$root
     document.body.appendChild(this._pvm.$el)
     this.popins = new Popper(this.ref, this.popper, this._opts.options)
     if (this.ref.isFixed) {

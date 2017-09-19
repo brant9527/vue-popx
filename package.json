@@ -1,13 +1,14 @@
 {
   "name": "vue-popx",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "vue popper",
   "main": "dist/vue-popx.js",
   "module": "dist/vue-popx.esm.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c && uglifyjs dist/vue-popx.js --comments -o dist/vue-popx.min.js",
-    "dev": "rollup -c -w"
+    "esm": "rollup -c rollup.esm.config.js",
+    "dev": "rollup -wm -c rollup.dev.config.js"
   },
   "repository": {
     "type": "git",

@@ -8,11 +8,12 @@
   <body>
     <div id="app">
       {{message}}
-      <div class="tpls" style="display: none;">
-        <div class="popx-html">
-          hello china<br>
-          <span @click="popxHtmlClick"> click </span>
-        </div>
+    </div>
+    <div class="tpls" style="display: none;">
+      <div class="popx-html">
+        hello china<br>
+        {{a}}
+        <span @click='clickAction'>click</span>
       </div>
     </div>
     <script src="https://cdn.bootcss.com/popper.js/1.12.5/umd/popper.js"></script>
@@ -22,7 +23,12 @@
       Vue.use(this['vue-popx'])
 
       var Child = {
-        template: '<div>A custom component!</div>'
+        template: '<div>A custom component!</div>',
+        created: function () {
+          console.log('create')
+          console.log(this)
+          console.log(this.$Popx)
+        }
       }
 
       console.log(Child)
@@ -32,15 +38,27 @@
         data: {
           message: 'Hello Vue!'
         },
-        methods: {
-          popxHtmlClick: function () {
-            console.log('popxHtmlClick')
-          }
-        },
         mounted: function () {
-          this.$Popx({
-            popper: document.querySelector('.popx-html')
+          let ts = this
+          let tt = this.$Popx({
+            popper: {
+              template: document.querySelector('.popx-html').outerHTML,
+              data: function () {
+                return  {
+                  a: 'abcd'
+                }
+              }, 
+              methods: {
+                clickAction: function () {
+                  ts.message = 'this is message'
+                }
+              },
+              created: function () {
+                
+              }
+            }
           });
+          // this.$Popx.close(tt.uid)
         }
       })
     </script>

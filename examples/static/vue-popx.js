@@ -1,6 +1,6 @@
 /**
  * vue-popx v1.0.0
- * (c) 2017/9/18 下午6:19:57 Hainc <cnria@qq.com>
+ * (c) 2017/9/19 上午9:27:24 Hainc <cnria@qq.com>
  * @license MIT
  */
 (function (global, factory) {
@@ -20,9 +20,10 @@ var Poptype = {
     } else {
       switch ((typeof popper).toLowerCase()) {
         case 'object':
-          var ifs = popper.hasOwnProperty('render') && popper.hasOwnProperty('staticRenderFns');
-          ifs = ifs || popper.hasOwnProperty('template');
-          if (ifs) { type = 'component'; }
+          var if1 = popper.hasOwnProperty('render') && popper.hasOwnProperty('staticRenderFns');
+          var if2 = popper.hasOwnProperty('template') && (typeof popper.template).toLowerCase() === 'string';
+          if (!if2 && popper.template) { throw new Error('The template must be a string') }
+          if (if1 || if2) { type = 'component'; }
           break
         case 'string':
           type = 'string';
@@ -33,7 +34,37 @@ var Poptype = {
   }
 };
 
-var Static = {};
+// 弹窗管理
+var PopManage = function PopManage () {
+  this._pops = {};
+};
+PopManage.prototype.add = function add (ins) {
+  this._pops[ins.uuid] = ins;
+  return ins.uuid
+};
+PopManage.prototype.popins = function popins (uid) {
+  return this._pops[uid]
+};
+PopManage.prototype.remove = function remove (uid) {
+  delete this._pops[uid];
+};
+PopManage.prototype.close = function close (uid) {
+    var this$1 = this;
+
+  if (uid) {
+    this.popins(uid).close();
+    this.remove(uid);
+  } else {
+    for (var key in this$1._pops) {
+      this$1._pops[key].close();
+      this$1.remove(key);
+    }
+  }
+};
+
+var Static = {
+  manage: new PopManage()
+};
 
 var Base = (function () {
   function anonymous (opts, vm) {
@@ -60,7 +91,7 @@ var Base = (function () {
   anonymous.prototype.initComplete = function initComplete () {
     var this$1 = this;
 
-    this._pvm['$parent'] = this._pvm['$root'] = this._vm.$root;
+    this._pvm['$parent'] = this._vm.$root;
     document.body.appendChild(this._pvm.$el);
     this.popins = new Popper(this.ref, this.popper, this._opts.options);
     if (this.ref.isFixed) {
@@ -166,120 +197,18 @@ var PopCom = (function (Base$$1) {
   return PopCom;
 }(Base));
 
-var PopStr = (function (Base$$1) {
-  function PopStr () {
-    Base$$1.apply(this, arguments);
-  }
-
-  if ( Base$$1 ) PopStr.__proto__ = Base$$1;
-  PopStr.prototype = Object.create( Base$$1 && Base$$1.prototype );
-  PopStr.prototype.constructor = PopStr;
-
-  var prototypeAccessors = { popper: {} };
-
-  PopStr.prototype.init = function init () {
-    var TempC = this._static.Vue.extend({
-      template: ("<div class=\"popx-str\">" + (this._opts.popper) + "</div>"),
-      data: function () { return ({
-        popxdata: {}
-      }); }
-    });
-    // 赋值popper vm实例
-    this._pvm = new TempC();
-    this._pvm.$mount();
-    if (this._pvm.popxdata) { this._pvm.popxdata = this._opts.data; }
-    this._pvm.$el.setAttribute('data-uid', this.uuid);
-    this.initComplete();
-  };
-  prototypeAccessors.popper.get = function () {
-    return this._pvm.$el
-  };
-
-  Object.defineProperties( PopStr.prototype, prototypeAccessors );
-
-  return PopStr;
-}(Base));
-
-var PopHtml = (function (Base$$1) {
-  function PopHtml () {
-    Base$$1.apply(this, arguments);
-  }
-
-  if ( Base$$1 ) PopHtml.__proto__ = Base$$1;
-  PopHtml.prototype = Object.create( Base$$1 && Base$$1.prototype );
-  PopHtml.prototype.constructor = PopHtml;
-
-  var prototypeAccessors = { popper: {} };
-
-  PopHtml.prototype.init = function init () {
-    this._pvm = new this._static.Vue({
-      el: this._opts.popper,
-      data: {
-        popxdata: {}
-      }
-    });
-    if (this._pvm.popxdata) { this._pvm.popxdata = this._opts.data; }
-    this._pvm.$el.setAttribute('data-uid', this.uuid);
-    this.initComplete();
-  };
-  PopHtml.prototype.initComplete = function initComplete () {
-    document.body.appendChild(this._pvm.$el);
-    Base$$1.prototype.initComplete.call(this);
-  };
-  prototypeAccessors.popper.get = function () {
-    return this._pvm.$el
-  };
-
-  Object.defineProperties( PopHtml.prototype, prototypeAccessors );
-
-  return PopHtml;
-}(Base));
-
-// 解析类型映射
 var MAP = {
-  'component': PopCom,
-  'string': PopStr,
-  'html': PopHtml
+  'component': PopCom
 };
-// 弹窗管理
-var PopManage = function PopManage () {
-  this._pops = {};
-};
-PopManage.prototype.add = function add (ins) {
-  this._pops[ins.uuid] = ins;
-  return ins.uuid
-};
-PopManage.prototype.popins = function popins (uid) {
-  return this._pops[uid]
-};
-PopManage.prototype.remove = function remove (uid) {
-  delete this._pops[uid];
-};
-PopManage.prototype.close = function close (uid) {
-    var this$1 = this;
-
-  if (uid) {
-    this.popins(uid).close();
-    this.remove(uid);
-  } else {
-    for (var key in this$1._pops) {
-      this$1._pops[key].close();
-      this$1.remove(key);
-    }
-  }
-};
-// 实例化
-var popmanage = new PopManage();
 
 var PopParse = function (opts, vm) {
   var type = Poptype.checkPopper(opts.popper);
   // console.log(type)
   var Constr = MAP[type];
   if (!Constr) { throw new Error('没有匹配的弹窗解析') }
-  if (!vm.$root.popx_manage) { vm.$root.popx = popmanage; }
   var tempPop = new Constr(opts, vm);
   tempPop.type = type;
-  return popmanage.add(tempPop)
+  return Static.manage.add(tempPop)
 };
 
 var DEFAULT = {
@@ -297,24 +226,26 @@ var DEFAULT = {
   },
   data: {}
 };
-var rvm = null;
 var func = function (opts) {
   opts = Object.assign({}, DEFAULT, opts);
   if (!opts.popper) { throw new Error('popper not define') }
-  if (!rvm) { rvm = this.$root; }
   if (opts.reference.isFixed) {
     opts.options.modifiers = {
       applyStyle: { enabled: false }
     };
   }
-  return {
-    uid: PopParse(opts, this),
-    func: func
-  }
+  return PopParse(opts, this)
 };
 
 func.close = function (uid) {
-  rvm.popx.close(uid);
+  if (Static.manage) { Static.manage.close(uid); }
+};
+
+func.manage = Static.manage;
+
+func.destroy = function () {
+  delete func.manage;
+  delete Static.Vue.prototype.$Popx;
 };
 
 /**
@@ -340,3 +271,4 @@ var main = {
 return main;
 
 })));
+//# sourceMappingURL=vue-popx.js.map
